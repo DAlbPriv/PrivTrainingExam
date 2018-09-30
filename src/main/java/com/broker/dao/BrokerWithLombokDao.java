@@ -16,13 +16,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import org.apache.log4j.Logger;
-
 import com.broker.model.Stock;
+import lombok.extern.log4j.Log4j;
 
-
+@Log4j
 public class BrokerWithLombokDao implements IDao<List<Stock>>{
+	static final Logger logger = Logger.getLogger(BrokerWithLombokDao.class);
 	static BigDecimal AMOUNT_INVESTED = BigDecimal.valueOf(50);
 	static BigDecimal PERCENTAGE = BigDecimal.valueOf(100);
 	static BigDecimal COMISSION = BigDecimal.valueOf(2);
@@ -31,14 +31,15 @@ public class BrokerWithLombokDao implements IDao<List<Stock>>{
 	static BigDecimal stocks =  BigDecimal.ZERO;
 	static Stock previousStock = new Stock();
 	static List<Stock> stockListFromFile = null;
-	static final Logger logger = Logger.getLogger(BrokerWithLombokDao.class);
 		
 	static {
 		investedByMonth = calculateRealInvested();
 	}
 	
 	public void parse() throws IOException {
+		log.info("Openning CSV File:");
 		BufferedReader bufferedReader = openFile();
+		log.info("Getting list of stocks:");
 		stockListFromFile = bufferedReader.lines().skip(1).map(parseStudent).collect(Collectors.toList());
 	}
 	
@@ -48,7 +49,7 @@ public class BrokerWithLombokDao implements IDao<List<Stock>>{
 		try {
 			stock.setDate(getFormat().parse(datos[0]));
 		} catch (ParseException e) {
-			e.printStackTrace();
+			log.error(new StringBuilder("The date: ").append(datos[0]).append("cannot be parsed with: ").append(getFormat().toString()));
 		}
 		stock.setOut(new BigDecimal(datos[1]));
 		stock.setIn(new BigDecimal(datos[2]));
@@ -62,49 +63,32 @@ public class BrokerWithLombokDao implements IDao<List<Stock>>{
 	};
 	
 	private static BigDecimal calculateRealInvested() {
+		log.info("initializing the static amount of money to invest:");
 		BigDecimal PercentageWithoutCommision = PERCENTAGE.subtract(COMISSION);
 		BigDecimal myRealPercentage= PercentageWithoutCommision.divide(PERCENTAGE,10,RoundingMode.HALF_UP);
-		return myRealPercentage.multiply(AMOUNT_INVESTED);
+		BigDecimal toReturn = myRealPercentage.multiply(AMOUNT_INVESTED);
+		log.info(toReturn.toString());
+		return toReturn;
 	}
 
 	public BigDecimal calculateSellingPrice() {
-		//BigDecimal stockPerDayCalculated = null;
 		Collections.sort(stockListFromFile);
 		stockListFromFile.forEach(stock -> {
 			Stock aux = stock;
-			if(previousStock.isLastThursday())
+			if(previousStock.isLastThursday()){
 				stocks = stocks.add(buyStock(aux,investedByMonth));
-			if (aux.isLastThursday())
-				previousStock = aux;
-		});
-		
-	/*	for(int i = 0; i < stockListFromFile.size(); i++) {
-			aux = stockListFromFile.get(i);
-			if(previousStock.isLastThursday() && i != stockListFromFile.size() - 1)
-				stocks = stocks.add(buyStock(aux,investedByMonth));
-			if (aux.isLastThursday() && i != stockListFromFile.size() - 1)
-				previousStock = aux;
-		}
-*/
-			totalInvested = stocks.multiply(stockListFromFile.get(stockListFromFile.size()-1).getOut());
-/*			if(previousStock.isLastThursday())
-				totalInvested = totalInvested.add(investedByMonth);
-			if (aux.isLastThursday() && i != stockList.size() - 1)
-				previousStock = aux;
-			stockPerDayCalculated = CalculateStock(aux);
-			if(!totalInvested.equals(BigDecimal.ZERO))
-				totalInvested = totalInvested.multiply(stockPerDayCalculated, MathContext.DECIMAL32);
+				log.info(new StringBuilder("").append(stock.getDate()).append(": ").append(stocks.toString()));
+			}
 			previousStock = aux;
-*/
-		
-
+		});
+	
+		totalInvested = stocks.multiply(stockListFromFile.get(stockListFromFile.size()-1).getOut());
 		return totalInvested.setScale(3, RoundingMode.HALF_UP);
-
 	}
 	
 	
 	private static BigDecimal buyStock(Stock aux,BigDecimal investedByMonth){
-		return aux.getIn().divide(investedByMonth,10,RoundingMode.HALF_UP);
+		return investedByMonth.divide(aux.getIn(),10,RoundingMode.HALF_UP);
 	}
 
 
