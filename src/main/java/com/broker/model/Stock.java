@@ -13,10 +13,10 @@ public class Stock implements Comparable<Stock> {
 	private Date date;
 	private BigDecimal in;
 	private BigDecimal out;
-	private boolean isLastThursday;
+	private boolean firstDayAfterLastThursday;
 	
 	public Stock() {
-		isLastThursday=false;
+		firstDayAfterLastThursday=false;
 	}
 	
 	@Override

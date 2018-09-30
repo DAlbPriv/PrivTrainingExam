@@ -1,4 +1,4 @@
-package com.broker.utils;
+package src.main.deprecated;
 
 import static java.time.DayOfWeek.THURSDAY;
 import static java.time.temporal.TemporalAdjusters.lastInMonth;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 import com.broker.model.Stock;
 
 public class fuleutils {
-	static Properties prop = null;
+/*	static Properties prop = null;
 	static InputStream input = null;
 	static List<Stock> stockList = new ArrayList<Stock>();
 	static List<Stock> stockInvestedList = new ArrayList<Stock>();
@@ -67,7 +67,7 @@ public class fuleutils {
 			if(!totalInvested.equals(BigDecimal.ZERO))
 				totalInvested = totalInvested.multiply(stockPerDayCalculated, MathContext.DECIMAL32);
 			previousStock = aux;
-*/
+
 		}
 		System.out.println(stocks.multiply(stockList.get(stockList.size()-1).getOut()));
 
@@ -124,5 +124,5 @@ public class fuleutils {
 		}
 		return stockList;
 	}
-
+*/
 }

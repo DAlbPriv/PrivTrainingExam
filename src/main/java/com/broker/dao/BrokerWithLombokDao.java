@@ -3,7 +3,7 @@ package com.broker.dao;
 import static com.broker.utils.DatesOperations.getFormat;
 import static com.broker.utils.DatesOperations.getDateParts;
 import static com.broker.utils.DatesOperations.lastThursdayInMonth;
-import static com.broker.utils.DatesOperations.checkIfLastThursdayInMonth;
+import static com.broker.utils.DatesOperations.checkIfDayAfterLastThursdayInMonth;
 import static com.broker.utils.FileHandler.openFile;
 
 import java.io.BufferedReader;
@@ -31,6 +31,8 @@ public class BrokerWithLombokDao implements IDao<List<Stock>>{
 	static BigDecimal stocks =  BigDecimal.ZERO;
 	static Stock previousStock = new Stock();
 	static List<Stock> stockListFromFile = null;
+	static boolean firstDayAfterLastThursday = false;
+	static int month = 0;
 		
 	static {
 		investedByMonth = calculateRealInvested();
@@ -53,11 +55,6 @@ public class BrokerWithLombokDao implements IDao<List<Stock>>{
 		}
 		stock.setOut(new BigDecimal(datos[1]));
 		stock.setIn(new BigDecimal(datos[2]));
-		HashMap<String, Integer> dateParts = getDateParts(stock.getDate());
-		
-		boolean isLastThursday = checkIfLastThursdayInMonth(lastThursdayInMonth(dateParts), stock.getDate());	
-		
-		stock.setLastThursday(isLastThursday);
 		
 		return stock;
 	};
@@ -74,12 +71,20 @@ public class BrokerWithLombokDao implements IDao<List<Stock>>{
 	public BigDecimal calculateSellingPrice() {
 		Collections.sort(stockListFromFile);
 		stockListFromFile.forEach(stock -> {
-			Stock aux = stock;
-			if(previousStock.isLastThursday()){
-				stocks = stocks.add(buyStock(aux,investedByMonth));
-				log.info(new StringBuilder("").append(stock.getDate()).append(": ").append(stocks.toString()));
-			}
+				Stock aux = stock;
+				if(previousStock.getDate()!=null) {
+					HashMap<String, Integer> dateParts = getDateParts(previousStock.getDate());
+					lastThursdayInMonth(dateParts);
+					firstDayAfterLastThursday = checkIfDayAfterLastThursdayInMonth(lastThursdayInMonth(dateParts), stock.getDate(),previousStock.getDate());	
+					if(firstDayAfterLastThursday){
+						stocks = stocks.add(buyStock(aux,investedByMonth));
+						log.info(new StringBuilder("").append(stock.getDate()).append(": ").append(stocks.toString()));
+						firstDayAfterLastThursday = false;
+					}
+				}
 			previousStock = aux;
+			
+			
 		});
 	
 		totalInvested = stocks.multiply(stockListFromFile.get(stockListFromFile.size()-1).getOut());

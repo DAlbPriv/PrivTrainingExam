@@ -54,11 +54,13 @@ public class DatesOperations {
 		return format;
 	}
 	
-	public static boolean checkIfLastThursdayInMonth(LocalDate LastThursdayofMonth, Date fromStock) {
-		boolean isLastThursday = false;
-		if (LastThursdayofMonth.isEqual(fromStock.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()))
+	public static boolean checkIfDayAfterLastThursdayInMonth(LocalDate LastThursdayofMonth, Date fromAcutalStock,Date FromPreviousStock) {
+		LocalDate actualStockDate = fromAcutalStock.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		LocalDate previousStockDate = FromPreviousStock.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		if((previousStockDate.isBefore(LastThursdayofMonth)||previousStockDate.isEqual(LastThursdayofMonth)) && actualStockDate.isAfter(LastThursdayofMonth))
 			return true;
-		return isLastThursday;
+		return false;
+
 	}
 
 }
