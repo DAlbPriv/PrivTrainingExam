@@ -13,12 +13,11 @@ public class Stock implements Comparable<Stock> {
 	private Date date;
 	private BigDecimal in;
 	private BigDecimal out;
-	private boolean firstDayAfterLastThursday;
 	
-	public Stock() {
-		firstDayAfterLastThursday=false;
-	}
 	
+	/**
+	 * To be able to sort a list of this element, this method is Override from Comparable class.
+	 */
 	@Override
 	public int compareTo(Stock o) {
 	    int a = this.getDate().compareTo(o.getDate());

@@ -19,45 +19,75 @@ import com.broker.dao.BrokerWithLombokDao;
 import lombok.Getter;
 import lombok.Setter;
 
+
+/**
+ * This class defines some operations that can be done on dates.
+ * @author daniel.albendin
+ * @methods
+ *
+ */
 public class DatesOperations {
 	
-	static Calendar cal = null;
+	static Calendar calendar = null;
 	static DateFormat format = null;
 
 	
 	static {
-		cal = Calendar.getInstance();
+		calendar = Calendar.getInstance();
 		format = new SimpleDateFormat("dd-MMM-yyyy", new Locale("es", "ES"));
 	}
 		
-	public static LocalDate lastThursdayInMonth(HashMap<String,Integer> abc){
-		int year = abc.get("year");
-		int month = abc.get("month");
-		int day = abc.get("day");
+
+	/**
+	 * 
+	 * @param mappingDateValues a map with the values of a date
+	 * @return  Return the last Thursday of each month for a specified date.
+	 */
+	public static LocalDate lastThursdayInMonth(HashMap<String,Integer> mappingDateValues){
+		int year = mappingDateValues.get("year");
+		int month = mappingDateValues.get("month");
+		int day = mappingDateValues.get("day");
 		return LocalDate.of(year, month, day).with(lastInMonth(THURSDAY));
 	}
 
+	/**
+	 * 
+	 * @param stockDate
+	 * @return a Hashmap with the value of the fields year, month and day date parsed with a calendar.
+	 */
 	public static HashMap<String, Integer> getDateParts(Date stockDate){
-		cal.setTime(stockDate);
+		calendar.setTime(stockDate);
 		int realMonth = 0;
 		HashMap<String, Integer> dateParts = new HashMap<String, Integer>();
-		dateParts.put("year", cal.get(Calendar.YEAR));
-		realMonth = cal.get(Calendar.MONTH)+1;
+		dateParts.put("year", calendar.get(Calendar.YEAR));
+		realMonth = calendar.get(Calendar.MONTH)+1;
 		if (realMonth == 13)
 			realMonth = 1;
 		dateParts.put("month", realMonth);
-		dateParts.put("day",cal.get(Calendar.DAY_OF_MONTH));
+		dateParts.put("day",calendar.get(Calendar.DAY_OF_MONTH));
 		return dateParts;
 	}
 
+	/**
+	 * 
+	 * @return format date instantiated in this class
+	 */
 	public static DateFormat getFormat() {
 		return format;
 	}
 	
-	public static boolean checkIfDayAfterLastThursdayInMonth(LocalDate LastThursdayofMonth, Date fromAcutalStock,Date FromPreviousStock) {
-		LocalDate actualStockDate = fromAcutalStock.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-		LocalDate previousStockDate = FromPreviousStock.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-		if((previousStockDate.isBefore(LastThursdayofMonth)||previousStockDate.isEqual(LastThursdayofMonth)) && actualStockDate.isAfter(LastThursdayofMonth))
+	
+	/**
+	 * 
+	 * @param lastThursdayofMonth
+	 * @param dateFromActualStock
+	 * @param dateFromPreviousStock
+	 * @return true if the previous stock date is before or a last Thursday of that month and the actual stock is bigger.
+	 */
+	public static boolean checkIfDayAfterLastThursdayInMonth(LocalDate lastThursdayofMonth, Date dateFromActualStock,Date dateFromPreviousStock) {
+		LocalDate actualStockDate = dateFromActualStock.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		LocalDate previousStockDate = dateFromPreviousStock.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		if((previousStockDate.isBefore(lastThursdayofMonth)||previousStockDate.isEqual(lastThursdayofMonth)) && actualStockDate.isAfter(lastThursdayofMonth))
 			return true;
 		return false;
 

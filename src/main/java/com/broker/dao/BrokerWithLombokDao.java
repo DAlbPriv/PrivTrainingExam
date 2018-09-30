@@ -21,6 +21,13 @@ import com.broker.model.Stock;
 import lombok.extern.log4j.Log4j;
 
 @Log4j
+/**
+ * This class parses and do operations on an array list of 
+ * Stocks.
+ * 
+ * @author daniel.albendin
+ *
+ */
 public class BrokerWithLombokDao implements IDao<List<Stock>>{
 	static final Logger logger = Logger.getLogger(BrokerWithLombokDao.class);
 	static BigDecimal AMOUNT_INVESTED = BigDecimal.valueOf(50);
@@ -38,6 +45,11 @@ public class BrokerWithLombokDao implements IDao<List<Stock>>{
 		investedByMonth = calculateRealInvested();
 	}
 	
+	
+	/**
+	 * This method reads the file and assign to the stockListFromFile variable, the result
+	 * of parsing that information with the parseStudent Method.
+	 */
 	public void parse() throws IOException {
 		log.info("Openning CSV File:");
 		BufferedReader bufferedReader = openFile();
@@ -45,6 +57,11 @@ public class BrokerWithLombokDao implements IDao<List<Stock>>{
 		stockListFromFile = bufferedReader.lines().skip(1).map(parseStudent).collect(Collectors.toList());
 	}
 	
+	/**
+	 * 
+	 * @parameters csvLine. A plain line from a CSV with the information of an investment.
+	 * @return The function returns a Stock object created after parsing the CSV file.
+	 */
 	private static Function<String, Stock> parseStudent = (csvLine) -> {
 		Stock stock = new Stock();
 		String[] datos = csvLine.split(";");
@@ -59,6 +76,10 @@ public class BrokerWithLombokDao implements IDao<List<Stock>>{
 		return stock;
 	};
 	
+	/**
+	 * 
+	 * @return The value of the real amount invested after substracting the comission percentage
+	 */
 	private static BigDecimal calculateRealInvested() {
 		log.info("initializing the static amount of money to invest:");
 		BigDecimal PercentageWithoutCommision = PERCENTAGE.subtract(COMISSION);
@@ -68,6 +89,13 @@ public class BrokerWithLombokDao implements IDao<List<Stock>>{
 		return toReturn;
 	}
 
+	/**
+	 * This method calculates the amount of money that has been achieved with the investment.
+	 * This method sorts the array and then foreach element it checks if it is the last day after the 
+	 * last Thursday of each month and add stocks to the current amount. selling it the last day in the file.
+	 * 
+	 * @return Money after investing
+	 */
 	public BigDecimal calculateSellingPrice() {
 		Collections.sort(stockListFromFile);
 		stockListFromFile.forEach(stock -> {
@@ -91,9 +119,14 @@ public class BrokerWithLombokDao implements IDao<List<Stock>>{
 		return totalInvested.setScale(3, RoundingMode.HALF_UP);
 	}
 	
-	
-	private static BigDecimal buyStock(Stock aux,BigDecimal investedByMonth){
-		return investedByMonth.divide(aux.getIn(),10,RoundingMode.HALF_UP);
+	/**
+	 * 
+	 * @param currentDaySTock The day with the price of in and out of the stocks
+	 * @param investedByMonth The amount of money to be invested
+	 * @return The amount of stocks bought 
+	 */
+	private static BigDecimal buyStock(Stock currentDaySTock,BigDecimal investedByMonth){
+		return investedByMonth.divide(currentDaySTock.getIn(),10,RoundingMode.HALF_UP);
 	}
 
 

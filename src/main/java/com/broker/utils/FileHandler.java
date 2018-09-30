@@ -25,6 +25,11 @@ public class FileHandler {
 		}
 	}
 
+	/**
+	 * This method opens the file indicated in the properties file.
+	 * @return the bufferedReader ready to read the file.
+	 * @throws IOException if the file does not exists
+	 */
 	public static BufferedReader openFile() throws IOException{
 		String fileName = prop.getProperty("filename");
 		String resourcePath = prop.getProperty("resourcePath");
